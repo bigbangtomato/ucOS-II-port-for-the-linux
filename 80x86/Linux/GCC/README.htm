@@ -1,0 +1,294 @@
+<HTML>
+<HEAD>
+	<TITLE>uCOS-II LINUX Port - Werner.Zimmermann|AT|fht-esslingen.de </TITLE>
+	<META name="generator" content="HTML Tidy, see www.w3.org">
+	<META http-equiv="keywords" content="uCOS-II LINUX Port">
+	<META http-equiv="description" content="uCOS-II LINUX Port">
+	<META http-equiv="author" content="Prof. Dr.-Ing. Werner Zimmermann, FHTE Esslingen, Germany">
+	<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+	<STYLE type="text/css"> body {font-family: Arial,Helvetica,Sans-Serif; font-size: 12pt}
+	p {font-family: Arial,Helvetica,Sans-Serif; font-size: 12pt}
+	h1 {font-family: Arial,Helvetica,Sans-Serif; font-size: 16pt}
+	h2 {font-family: Arial,Helvetica,Sans-Serif; font-size: 14pt}
+	h3 {font-family: Arial,Helvetica,Sans-Serif; font-size: 12pt}
+	span {font-family: Arial,Helvetica,Sans-Serif; font-size: 12pt}
+	ul {font-family: Arial,Helvetica,Sans-Serif; font-size: 12pt}
+	.standard {font-family: Arial,Helvetica,Sans-Serif; font-size: 12pt}
+	</STYLE>
+
+</HEAD>
+<BODY>
+	<H1>uCOS-II - Port for the LINUX Operating System
+	</H1>
+	<H3>
+	    Copyright (C) 2004-... Werner.Zimmermann|AT|fht-esslingen.de
+	</H3>
+	<HR>
+	
+	<H2>
+	    Note for Linux Kernel 2.6.x Users: Beginning with uCOS-II Linux Port V2.0
+	    should be compatible with Linux kernel 2.6.x. In Linux kernel 2.6.x there
+	    were some incompatible modifications to the kernel's threading implementation
+	    which broke uCOS-II Linux Port V1.x.
+	</H2>
+
+	<HR>
+	
+	<H2>
+	    Overview
+	</H2>
+	<P>
+	    uCOS-II is a small, yet powerful real-time operating system developed by Jean J. Labrosse
+	    and described in his book "MicroC/OS-II - The Real-Time-Kernel", Second Edition, published
+	    by CMP Books. The operating system is highly CPU independent and has been ported to numerous
+	    microprocessor platforms (see <a href="http://www.ucos-ii.com">www.ucos-ii.com</a>). The source code 
+	    as provided together with the book and via the web site may be freely used for non-commercial 
+	    applications and educational purposes. Licenses for commercial use are available too.
+	</P>
+	<P>
+	    This document describes the LINUX port of uCOS-II, which allows to
+	    run uCOS-II applications under LINUX. As the port relies on
+	    LINUX' process and thread management features, the uCOS-II LINUX port does ***NOT***
+	    turn LINUX into a real-time operating system!
+
+	    It was developed for didactic purposes to teach students at the Esslingen University of
+	    Applied Sciences, Esslingen, Germany the basics of real-time operating systems with
+	    an insight to OS internal implementation. This approach was chosen, because students
+	    do have much easier access to PCs at home or at university computing centers rather than to proprietary
+	    embedded systems. Powerful PC-based development tools like GCC are
+	    available free of charge 
+	    as compared to costly embedded system cross-compilers and debuggers. Thus real-time system
+	    mechanisms can be studied with uCOS-II under LINUX providing a soft real-time-environment
+	    on PCs at home or in the university computer center. If the basic functionality of the
+	    application is working correctly, the application can be easily ported to an embedded system
+	    later in the lab.
+	</P>
+		<UL>
+	    <LI><B>
+		<A href="http://www.fht-esslingen.de/~zimmerma/software/index_uk.html"  target=_top>Get the latest version of uCOS-II LINUX and WIN32 ports</A>
+		</B>
+	    <LI>
+		<A href="#Release">Release Notes</A>
+	    <LI>
+		<A href="#Installation">Installation and Running the Samples</A>
+	    <LI>
+		<A href="#Internals">LINUX Port Internals and Limitations</A>
+	    <LI>
+		<A href="#Disclaimer">Disclaimer and Copyright Information</A>
+	</UL>
+
+	<BR>
+
+	<H2>
+	    <A name="Release"></A>Release Notes
+	</H2>
+	<P>
+	    Only the port specific files of uCOS-II (and some examples) are provided here. It is
+	    assumed, that you do have the uCOS-II platform-independent source code as available together
+	    with the book or via www.ucos-ii.com.
+	</P>
+	<P>
+	    The port was tested with the uCOS-II sources V2.52, which are distributed together with
+	    the second edition of Jean J. Labrosse's book. You will need GNU GCC C-compiler to
+	    compile the LINUX samples provided here. The port has been developed using
+	    GCC 3.1. The LINUX port is based on the WIN32 port of the same author, so in many points
+	    a solution, which allowed to make the WIN32 and LINUX port match as closely as possible 
+	    instead of a more elegant LINUX solution was chosen.
+	</P>
+        <P>
+	    V1.5 is the first published version of the LINUX port, as I chose to have the same version
+	    number for WIN32 and Linux.
+        </P>
+        <P>
+	    In V1.6 the resolution of the time measurement PC_Elapsed... in the Cygwin GCC and LINUX version
+	    was improved. Now these ports also use the Pentium time stamp counter.
+        </P>
+        <P>
+            In V2.0 signal handling was modified to adapt it to Linux kernel version 2.6.x. Older versions
+            did not run with that kernel, because the Linux thread implementation saw some changes, which 
+            were not backward compatible. In V2.0 instead of getpid() now gettid() and instead of kill() now
+            tkill() is used. Real code changes were kept small by using #define in os_cpu.h.
+	<P> V2.1 some include paths were modified to work with uCOS-II 2.70.
+	</P>
+
+	<BR>
+
+
+	<H2>
+	    <A name="Installation"></A>Installation, Running and Recompiling the Samples
+	</H2>
+	<P>
+	    You should <B>unpack</B> the files of the LINUX port into the uCOS-II installation directory
+	    (normally "/software/uCOS-II/"), keeping the directory structure of the LINUX port intact.
+	    If you installed uCOS-II in "/software/uCOS-II" with uCOS-II source files in "/software/uCOS-II/source",
+	    you will find the LINUX port for GCC in "/software/uCOS-II/Ports/80x86/Linux/GCC/" with the source
+	    code of the port files in subdirectory "./src", some examples under "./examples/" and some
+	    template files as starting point for your own applications in "./templates/". 
+	</P>
+	<P>
+	    To <B>run</B> one of the samples, CD to the appropriate sample's subdirectory, e.g. ".\examples\example1"
+	    and run the file "./test". All sample programs can be stopped by hitting the "ESC" key.
+	    The samples "example1", ..., "example4" are described in Jean J.Labrosse's book in chapter 1.
+	</P>
+	<P>
+	    To <B>recompile</B> one of the samples, go to the appropriate sample's subdirectory and type "make".
+	    If you did not install uCOS-II or the LINUX port as recommended, you may need to edit the sample's 
+	    "makefile", where paths are set in the makefile variables UCOS_SRC, UCOS_PORT_SRC and UCOS_PORT_EX. 
+	</P>
+	<P>
+	    If you get some 'file not found' errors, check your path and file names, especially watch out for upper/lower 
+	    case letter bugs and for '\' - '/' bugs . This especially happens, when copying files from Windows to LINUX, 
+	    because LINUX is case-sensitive, whereas Windows is not and uses a different path delimiter.
+	</P>
+	<P>
+	    As a starting point for <B>your own applications</B> you may use the template files in
+	    subdirectory "./templates". To get familiar with uCOS-II read Jean J. Labrosse's book.
+	    To learn about the limitations of the LINUX port, you should read the section about
+	    <A href="#Internals">LINUX port internals and limitations</A> in this document.
+	</P>
+	<P>
+	    There are several support functions for displaying characters or strings and measuring
+	    execution times and installing (simulated) "interrupt" service routines on the PC platform, 
+	    see PC.c and PC.h in the "./src" subdirectory.
+	    Where possible, these functions were modeled according to the functions provided
+	    in Jean J. Labrosse's 80x86 real mode port.
+	</P>
+
+	<BR>
+	<HR>
+	<H2>
+	    <A name="Internals"></A>LINUX Port Internals and Limitations
+	</H2>
+	<UL>
+	    <LI><B>Task Scheduling</B>
+	</UL>
+	<P>
+	    As LINUX does not allow application programs to bypass its own scheduler or provide
+	    their own timers and interrupt handlers, uCOS-II scheduling and task managment functions
+	    must be remapped to LINUX functions.
+	</P>
+	<P>
+	    The LINUX port is based on the WIN32 port of the same author, so in many points
+	    a solution, which allowed to make the WIN32 and LINUX port match as closely as possible 
+	    instead of a more elegant LINUX solution was chosen. The WIN32 port uses WIN32 threads, 
+	    which are suspended and resumed via WIN32 API functions and scheduling is triggered by
+	    WIN32 events. The LINUX port uses the same mechanisms with the system call clone() to
+	    create threads and LINUX signals instead of WIN32 events.
+	</P>
+	<P>
+	    uCOS-II tasks are mapped to LINUX threads. The mapping is done, when a task
+	    is created in OSTaskCreateHook(). Additionally two special LINUX threads OSScheduleThread()
+	    for thread scheduling handling and OSInterruptThread() for interrupt handling
+	    are created in OSInitHookBegin(). The scheduling and the interrupt thread are created
+	    with the a higher LINUX process priority. The threads associated with uCOS-II tasks
+	    are created with a lower priority and set to suspended state (via signal SIGSTOP).
+	</P>
+	<P>
+	    When the uCOS-II scheduler preempts a task and wants to switch context to a new uCOS-II task,
+	    the uCOS-II context switch function OSCtxSw() or OSIntCtxSw() triggers the scheduler thread
+	    via a signal hScheduleEvent (=SIGCONT). Because the scheduling thread OSScheduleThread() has
+	    a higher LINUX priority than all the WIN32 threads associated with uCOS-II tasks, LINUX will
+	    start the scheduling thread immediately. This thread will suspend the LINUX thread
+	    associated with the preempted uCOS-II task and resume the LINUX thread
+	    associated with the new uCOS-II task. Then the scheduler thread will wait for the next scheduler
+	    event (via system call pause()). So always exactly one LINUX thread associated with a uCOS-II task will be ready to run,
+	    all other uCOS-II task associated threads will be in LINUX suspended state. Thus this LINUX thread
+	    will be invoked by the LINUX operating system's internal
+	    scheduler, once the OSScheduleThread() waits for the next scheduling event, and will remain running
+	    until the uCOS-II scheduler is invoked the next time and retriggers the OSScheduleThread().
+	</P>
+
+	<UL>
+	    <LI><B>Time Tick Interrupts</B>
+	</UL>
+	<P>
+	    To generate the uCOS-II time tick, a LINUX timer is used. Theoretically this timer
+	    provides a 10ms resolution (LINUX internal time tick). Therefore
+	    your application should set OS_TICKS_PER_SECOND to not more than 100 ticks per second (i.e.
+	    to a tick period of 10ms min.). The timer will be started automatically via OSStartHighRdy()
+	    and OSTimeTickInit(), once your application starts uCOS-II multitasking by calling OSStart().
+	</P>
+	<P>
+	    LINUX periodically invokes a the signal handler OSTimeTickCallback() for the timer signal SIGALARM, 
+	    which triggers the signal hInterruptEvent. Due to this signal, LINUX immediately invokes
+	    the interrupt thread OSInterruptThread(), because this thread has a higher process
+	    priority than all uCOS-II task related threads. As expected by uCOS-II, the interrupt thread
+	    calls OSTimeTick(), which may reschedule another uCOS-II task. Then the interrupt thread
+	    waits for the next interrupt event.
+	</P>
+	<P>
+	    uCOS-II's critical sections normally disable interrupts. LINUX application programs, however,
+	    cannot disable interrupts. This issue is resolved by LINUX suspending the interrupt thread
+	    instead, once a uCOS-II critical section is entered by OS_ENTER_CRITICAL().
+	</P>
+
+
+	<UL>
+	    <LI><B>Limitations</B>
+	</UL>
+
+	<P>
+	    uCOS-II provides several <B>hook functions</B> to allow applications to modify the uCOS internal
+	    behaviour. Some of these hook functions are used to interact with the LINUX operating
+	    system in the LINUX port. Thus the following hooks MUST NOT be used by your application:
+	    <PRE>
+	    OSInitHookBegin(), OSTaskCreateHook(), OSTaskIdleHook()
+	    </PRE>
+	    If your application must execute own code when uCOS-II calls these hooks, you should
+	    add this code in file os_cpu_c.c. The appropriate points are marked in the code by
+	    <PRE>
+	    //ADD YOUR OWN HOOK CODE HERE IF NECESSARY
+	    </PRE>
+	    All other hook functions can be redefined by your application directly if you set OS_HOOKS_EN = 0,
+	    as described in the uCOS-II documentation.
+	</P>
+	<P>
+	    uCOS-II tasks are mapped to LINUX threads. These threads use their own LINUX <B>stacks</B> rather
+	    than the 'normal' uCOS-II task stacks. Stack size
+	    and stack management during context switches are automatically handled by LINUX. Nevertheless for
+	    compatibility reasons, when a uCOS-II task is created, a uCOS-II stack must be provided. Only a few
+	    bytes of this stack will be initialized, but this stack will not really be used by the running tasks.
+	    If you plan to test your application under LINUX and then port it to an embedded system, you
+	    ***CANNOT*** use the LINUX simulation to find out the necessary stack size. Your uCOS-II LINUX application
+	    should not rely on the uCOS-II stack checking and clearing functions and should not use
+	    any stack related programming tricks.
+	</P>
+<!---
+	<P>
+	    <B>Interrupts</B> are simulated using LINUX events OSirq1 ... OSirq7. Application programs
+	    can install their own interrupt service routines (for irq=1...7, see pc.c and example0\test.c).
+	    "Interrupts" can be triggered from another program (see utils\irqGenerator.c).
+	</P>
+--->
+	<BR>
+	<HR>
+	<H2>
+	    <A name="Disclaimer"></A>Disclaimer and Copyright Information
+	</H2>
+	<P>
+	    All files are provided in the hope, that they might be useful, but <STRONG>without any
+	    warranty or support</STRONG>. You may <STRONG>use them on your own risk in
+	    non-commercial applications</STRONG>. Even if this software is provided
+	    free of charge, it is <STRONG>no freeware</STRONG>. It is copyrighted by
+	    Werner.Zimmermann|AT|fht- esslingen.de, but may be freely used for non-commercial
+	    applications. If you do modify the source code and/or implement additional
+	    features, you are expected to provide the author with a copy of your source code
+	    and a description of the changes.
+	</P>
+	<P>
+	    If you want <STRONG>to use this software in commercial applications, contact the
+		author</STRONG>.
+	</P>
+	<P>
+	    In case you have problems, you may email a detailed description of the problem
+	    to Werner.Zimmermann|AT|fht-esslingen.de</A>. But the author does not guarantee, that
+	    he will answer your mail or solve the problem.
+	</P>
+	<P>
+	    uCOS-II, Windows , LINUX and other product names mentioned here may be
+	    trademarks or registered trademarks of their respective owners.
+	</P>
+	<HR>
+</BODY>
+</HTML>

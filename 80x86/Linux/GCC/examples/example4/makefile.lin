@@ -1,0 +1,19 @@
+########## Path for uCOS-II core source files #################################
+UCOS_SRC=/software/uCOS-II/source
+
+########## Path for uCOS-II WIN32 port source files ###########################
+UCOS_PORT_SRC=/software/uCOS-II/Ports/80x86/Linux/GCC/src
+
+########## Path for uCOS-II WIN32 example source files ########################
+UCOS_PORT_EX=/software/uCOS-II/Ports/80x86/Linux/GCC/examples/example4
+
+########## Name of Example source file ########################################
+EXAMPLE=test
+
+all:
+	@gcc -lm -D__LINUX__ -I$(UCOS_SRC) -I$(UCOS_PORT_SRC) -I$(UCOS_PORT_EX)  $(EXAMPLE).c $(UCOS_SRC)/uCOS_II.c $(UCOS_PORT_SRC)/pc.c $(UCOS_PORT_SRC)/os_cpu_c.c  -o $(EXAMPLE)
+
+clean:
+	@rm -f *.o
+	@rm -f *.bak
+	
